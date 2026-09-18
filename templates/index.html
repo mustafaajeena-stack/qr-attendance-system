@@ -1,0 +1,1502 @@
+
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>نظام تسجيل الحضور QR</title>
+
+
+    <!-- مكتبة QR -->
+
+    <script
+        src="https://unpkg.com/html5-qrcode"
+        type="text/javascript">
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            padding: 20px;
+
+            font-family: Arial, Tahoma, sans-serif;
+
+            background: #f2f4f7;
+
+            color: #222;
+        }
+
+
+        .container {
+
+            width: 100%;
+
+            max-width: 650px;
+
+            margin: 0 auto;
+
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 16px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.10);
+        }
+
+
+        h1 {
+
+            text-align: center;
+
+            margin-top: 0;
+
+            margin-bottom: 25px;
+        }
+
+
+        .field {
+
+            margin-bottom: 15px;
+        }
+
+
+        label {
+
+            display: block;
+
+            font-weight: bold;
+
+            margin-bottom: 7px;
+        }
+
+
+        select {
+
+            width: 100%;
+
+            padding: 13px;
+
+            font-size: 16px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 9px;
+
+            background: white;
+        }
+
+
+        select:disabled {
+
+            background: #eeeeee;
+
+            cursor: not-allowed;
+        }
+
+
+        #group-section {
+
+            display: none;
+        }
+
+
+        #camera-section {
+
+            display: none;
+
+            margin-top: 25px;
+        }
+
+
+        #reader {
+
+            width: 100%;
+
+            border-radius: 10px;
+
+            overflow: hidden;
+        }
+
+
+        #selected-info {
+
+            display: none;
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 10px;
+
+            background: #eef7ff;
+
+            line-height: 2;
+
+            border: 1px solid #d5eaff;
+        }
+
+
+        #counter {
+
+            margin-top: 15px;
+
+            padding: 12px;
+
+            text-align: center;
+
+            font-size: 20px;
+
+            font-weight: bold;
+        }
+
+
+        #scan-count {
+
+            font-size: 26px;
+        }
+
+
+        #last-code {
+
+            margin-top: 10px;
+
+            padding: 13px;
+
+            border-radius: 9px;
+
+            background: #f7f7f7;
+
+            text-align: center;
+
+            line-height: 1.8;
+
+            word-break: break-word;
+        }
+
+
+        #status {
+
+            margin-top: 15px;
+
+            padding: 13px;
+
+            border-radius: 9px;
+
+            text-align: center;
+
+            font-weight: bold;
+        }
+
+
+        .status-info {
+
+            background: #e7f3ff;
+
+            color: #1769aa;
+        }
+
+
+        .status-success {
+
+            background: #dff5e3;
+
+            color: #176b2c;
+        }
+
+
+        .status-error {
+
+            background: #fde2e2;
+
+            color: #9b1c1c;
+        }
+
+
+        #stop-camera {
+
+            width: 100%;
+
+            margin-top: 15px;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 9px;
+
+            background: #dc3545;
+
+            color: white;
+
+            font-size: 16px;
+
+            cursor: pointer;
+        }
+
+
+        #stop-camera:hover {
+
+            background: #c82333;
+        }
+
+
+        .required {
+
+            color: #d00;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container">
+
+
+    <h1>
+        📷 نظام تسجيل الحضور
+    </h1>
+
+
+    <!-- ================================================= -->
+    <!-- 1 - الدراسة -->
+    <!-- ================================================= -->
+
+    <div class="field">
+
+        <label>
+            1. الدراسة
+            <span class="required">*</span>
+        </label>
+
+
+        <select id="study">
+
+            <option value="">
+                -- اختر الدراسة --
+            </option>
+
+            <option value="صباحي">
+                صباحي
+            </option>
+
+            <option value="مسائي">
+                مسائي
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 2 - الفصل -->
+    <!-- ================================================= -->
+
+    <div class="field">
+
+        <label>
+            2. الفصل
+            <span class="required">*</span>
+        </label>
+
+
+        <select id="semester" disabled>
+
+            <option value="">
+                -- اختر الفصل --
+            </option>
+
+
+            {% for semester in academic_data.keys() %}
+
+            <option value="{{ semester }}">
+                {{ semester }}
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 3 - المرحلة -->
+    <!-- ================================================= -->
+
+    <div class="field">
+
+        <label>
+            3. المرحلة
+            <span class="required">*</span>
+        </label>
+
+
+        <select id="stage" disabled>
+
+            <option value="">
+                -- اختر المرحلة --
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 4 - المادة -->
+    <!-- ================================================= -->
+
+    <div class="field">
+
+        <label>
+            4. المادة
+            <span class="required">*</span>
+        </label>
+
+
+        <select id="subject" disabled>
+
+            <option value="">
+                -- اختر المادة --
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 5 - نوع المحاضرة -->
+    <!-- ================================================= -->
+
+    <div class="field">
+
+        <label>
+            5. نوع المحاضرة
+            <span class="required">*</span>
+        </label>
+
+
+        <select id="lecture-type" disabled>
+
+            <option value="">
+                -- اختر نوع المحاضرة --
+            </option>
+
+            <option value="نظري">
+                نظري
+            </option>
+
+            <option value="عملي">
+                عملي
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 6 - المجموعة -->
+    <!-- ================================================= -->
+
+    <div
+        class="field"
+        id="group-section"
+    >
+
+        <label>
+            6. المجموعة
+            <span class="required">*</span>
+        </label>
+
+
+        <select id="group">
+
+            <option value="">
+                -- اختر المجموعة --
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- المعلومات المختارة -->
+    <!-- ================================================= -->
+
+    <div id="selected-info"></div>
+
+
+    <!-- ================================================= -->
+    <!-- الكاميرا -->
+    <!-- ================================================= -->
+
+    <div id="camera-section">
+
+
+        <h2>
+            📷 مسح QR Code
+        </h2>
+
+
+        <div id="reader"></div>
+
+
+        <!-- العداد -->
+
+        <div id="counter">
+
+            عدد التسجيلات الناجحة:
+
+            <span id="scan-count">
+                0
+            </span>
+
+        </div>
+
+
+        <!-- آخر كود -->
+
+        <div id="last-code">
+
+            لم يتم مسح أي QR حتى الآن
+
+        </div>
+
+
+        <!-- الحالة -->
+
+        <div
+            id="status"
+            class="status-info"
+        >
+
+            وجّه الكاميرا نحو QR Code
+
+        </div>
+
+
+        <button id="stop-camera">
+
+            ⛔ إنهاء المسح
+
+        </button>
+
+
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+// =====================================================
+// بيانات الأكاديمية من Flask
+// =====================================================
+
+const academicData =
+    {{ academic_data | tojson }};
+
+
+// =====================================================
+// عناصر الصفحة
+// =====================================================
+
+const study =
+    document.getElementById("study");
+
+const semester =
+    document.getElementById("semester");
+
+const stage =
+    document.getElementById("stage");
+
+const subject =
+    document.getElementById("subject");
+
+const lectureType =
+    document.getElementById("lecture-type");
+
+const group =
+    document.getElementById("group");
+
+const groupSection =
+    document.getElementById("group-section");
+
+const selectedInfo =
+    document.getElementById("selected-info");
+
+const cameraSection =
+    document.getElementById("camera-section");
+
+const status =
+    document.getElementById("status");
+
+const scanCount =
+    document.getElementById("scan-count");
+
+const lastCode =
+    document.getElementById("last-code");
+
+const stopCameraButton =
+    document.getElementById("stop-camera");
+
+
+// =====================================================
+// متغيرات
+// =====================================================
+
+let scanner = null;
+
+let successfulScans = 0;
+
+let lastScannedCode = "";
+
+let lastScanTime = 0;
+
+let saving = false;
+
+
+// =====================================================
+// 1 - الدراسة
+// =====================================================
+
+study.addEventListener(
+    "change",
+    function () {
+
+        // تفعيل الفصل
+
+        semester.disabled =
+            !this.value;
+
+
+        // إعادة كل ما بعد الدراسة
+
+        semester.value = "";
+
+        stage.value = "";
+
+        subject.value = "";
+
+        lectureType.value = "";
+
+        group.value = "";
+
+
+        stage.innerHTML =
+            '<option value="">-- اختر المرحلة --</option>';
+
+
+        subject.innerHTML =
+            '<option value="">-- اختر المادة --</option>';
+
+
+        stage.disabled =
+            true;
+
+
+        subject.disabled =
+            true;
+
+
+        lectureType.disabled =
+            true;
+
+
+        groupSection.style.display =
+            "none";
+
+
+        selectedInfo.style.display =
+            "none";
+
+
+        stopCamera();
+
+    }
+);
+
+
+// =====================================================
+// 2 - الفصل
+// =====================================================
+
+semester.addEventListener(
+    "change",
+    function () {
+
+
+        const semesterValue =
+            this.value;
+
+
+        // إعادة المرحلة والمادة
+
+        stage.innerHTML =
+            '<option value="">-- اختر المرحلة --</option>';
+
+
+        subject.innerHTML =
+            '<option value="">-- اختر المادة --</option>';
+
+
+        stage.value = "";
+
+        subject.value = "";
+
+        lectureType.value = "";
+
+        group.value = "";
+
+
+        stage.disabled =
+            true;
+
+
+        subject.disabled =
+            true;
+
+
+        lectureType.disabled =
+            true;
+
+
+        groupSection.style.display =
+            "none";
+
+
+        selectedInfo.style.display =
+            "none";
+
+
+        stopCamera();
+
+
+        if (!semesterValue) {
+
+            return;
+        }
+
+
+        // جلب المراحل
+
+        const stages =
+            academicData[
+                semesterValue
+            ];
+
+
+        Object.keys(stages).forEach(
+            function(stageName) {
+
+
+                const option =
+                    document.createElement("option");
+
+
+                option.value =
+                    stageName;
+
+
+                option.textContent =
+                    stageName;
+
+
+                stage.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        stage.disabled =
+            false;
+
+    }
+);
+
+
+// =====================================================
+// 3 - المرحلة
+// =====================================================
+
+stage.addEventListener(
+    "change",
+    function () {
+
+
+        const semesterValue =
+            semester.value;
+
+
+        const stageValue =
+            this.value;
+
+
+        subject.innerHTML =
+            '<option value="">-- اختر المادة --</option>';
+
+
+        subject.value = "";
+
+        lectureType.value = "";
+
+        group.value = "";
+
+
+        subject.disabled =
+            true;
+
+
+        lectureType.disabled =
+            true;
+
+
+        groupSection.style.display =
+            "none";
+
+
+        selectedInfo.style.display =
+            "none";
+
+
+        stopCamera();
+
+
+        if (!stageValue) {
+
+            return;
+        }
+
+
+        const subjects =
+            academicData[
+                semesterValue
+            ][
+                stageValue
+            ];
+
+
+        subjects.forEach(
+            function(subjectName) {
+
+
+                const option =
+                    document.createElement("option");
+
+
+                option.value =
+                    subjectName;
+
+
+                option.textContent =
+                    subjectName;
+
+
+                subject.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        subject.disabled =
+            false;
+
+    }
+);
+
+
+// =====================================================
+// 4 - المادة
+// =====================================================
+
+subject.addEventListener(
+    "change",
+    function () {
+
+
+        lectureType.value = "";
+
+        group.value = "";
+
+
+        groupSection.style.display =
+            "none";
+
+
+        selectedInfo.style.display =
+            "none";
+
+
+        stopCamera();
+
+
+        lectureType.disabled =
+            !this.value;
+
+    }
+);
+
+
+// =====================================================
+// 5 - نوع المحاضرة
+// =====================================================
+
+lectureType.addEventListener(
+    "change",
+    function () {
+
+
+        const type =
+            this.value;
+
+
+        group.innerHTML =
+            '<option value="">-- اختر المجموعة --</option>';
+
+
+        groupSection.style.display =
+            "none";
+
+
+        selectedInfo.style.display =
+            "none";
+
+
+        stopCamera();
+
+
+        if (!type) {
+
+            return;
+        }
+
+
+        // =================================================
+        // نظري
+        // =================================================
+
+        if (type === "نظري") {
+
+            const groups = [
+                "A",
+                "B",
+                "C",
+                "D"
+            ];
+
+
+            groups.forEach(
+                function(groupName) {
+
+
+                    const option =
+                        document.createElement("option");
+
+
+                    option.value =
+                        groupName;
+
+
+                    option.textContent =
+                        groupName;
+
+
+                    group.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+
+
+        // =================================================
+        // عملي
+        // =================================================
+
+        if (type === "عملي") {
+
+            const groups = [
+                "A1",
+                "A2",
+                "B1",
+                "B2",
+                "C1",
+                "C2",
+                "D1",
+                "D2"
+            ];
+
+
+            groups.forEach(
+                function(groupName) {
+
+
+                    const option =
+                        document.createElement("option");
+
+
+                    option.value =
+                        groupName;
+
+
+                    option.textContent =
+                        groupName;
+
+
+                    group.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+        }
+
+
+        groupSection.style.display =
+            "block";
+
+    }
+);
+
+
+// =====================================================
+// 6 - المجموعة
+// =====================================================
+
+group.addEventListener(
+    "change",
+    function () {
+
+
+        stopCamera();
+
+
+        if (!this.value) {
+
+            selectedInfo.style.display =
+                "none";
+
+            return;
+        }
+
+
+        showSelectedInformation();
+
+
+        // تصفير العداد
+
+        successfulScans =
+            0;
+
+
+        scanCount.textContent =
+            "0";
+
+
+        lastCode.innerHTML =
+            "لم يتم مسح أي QR حتى الآن";
+
+
+        lastScannedCode =
+            "";
+
+
+        lastScanTime =
+            0;
+
+
+        // تشغيل الكاميرا
+
+        startCamera();
+
+    }
+);
+
+
+// =====================================================
+// عرض المعلومات
+// =====================================================
+
+function showSelectedInformation() {
+
+
+    selectedInfo.innerHTML =
+
+        "<strong>الدراسة:</strong> " +
+        study.value +
+
+        "<br>" +
+
+        "<strong>الفصل:</strong> " +
+        semester.value +
+
+        "<br>" +
+
+        "<strong>المرحلة:</strong> " +
+        stage.value +
+
+        "<br>" +
+
+        "<strong>المادة:</strong> " +
+        subject.value +
+
+        "<br>" +
+
+        "<strong>نوع المحاضرة:</strong> " +
+        lectureType.value +
+
+        "<br>" +
+
+        "<strong>المجموعة:</strong> " +
+        group.value;
+
+
+    selectedInfo.style.display =
+        "block";
+
+}
+
+
+// =====================================================
+// تشغيل الكاميرا
+// =====================================================
+
+function startCamera() {
+
+
+    if (scanner !== null) {
+
+        return;
+    }
+
+
+    cameraSection.style.display =
+        "block";
+
+
+    status.textContent =
+        "📷 جاري تشغيل الكاميرا...";
+
+
+    status.className =
+        "status-info";
+
+
+    scanner =
+        new Html5Qrcode("reader");
+
+
+    scanner.start(
+
+        {
+            facingMode: "environment"
+        },
+
+        {
+            fps: 10,
+
+            qrbox: {
+                width: 250,
+                height: 250
+            }
+        },
+
+
+        function(decodedText) {
+
+            processQRCode(
+                decodedText
+            );
+
+        },
+
+
+        function(errorMessage) {
+
+            // أخطاء القراءة العادية يتم تجاهلها
+
+        }
+
+    )
+
+
+    .then(
+        function() {
+
+
+            status.textContent =
+                "📷 الكاميرا جاهزة — امسح QR";
+
+
+            status.className =
+                "status-info";
+
+        }
+    )
+
+
+    .catch(
+        function(error) {
+
+
+            console.error(error);
+
+
+            status.textContent =
+                "❌ تعذر تشغيل الكاميرا";
+
+
+            status.className =
+                "status-error";
+
+
+            scanner =
+                null;
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// معالجة QR
+// =====================================================
+
+function processQRCode(code) {
+
+
+    const now =
+        Date.now();
+
+
+    code =
+        String(code).trim();
+
+
+    // منع القراءة المتكررة السريعة
+    // من نفس QR بسبب الكاميرا
+
+    if (
+        code === lastScannedCode &&
+        now - lastScanTime < 2000
+    ) {
+
+        return;
+    }
+
+
+    // يوجد طلب حفظ قيد التنفيذ
+
+    if (saving) {
+
+        return;
+    }
+
+
+    lastScannedCode =
+        code;
+
+
+    lastScanTime =
+        now;
+
+
+    saving =
+        true;
+
+
+    status.textContent =
+        "⏳ جاري التحقق من الكود...";
+
+
+    status.className =
+        "status-info";
+
+
+    saveScan(code);
+
+}
+
+
+// =====================================================
+// إرسال التسجيل إلى Flask
+// =====================================================
+
+function saveScan(code) {
+
+
+    fetch(
+        "/save_scan",
+        {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+
+                code:
+                    code,
+
+                study:
+                    study.value,
+
+                semester:
+                    semester.value,
+
+                stage:
+                    stage.value,
+
+                subject:
+                    subject.value,
+
+                lecture_type:
+                    lectureType.value,
+
+                group:
+                    group.value
+
+            })
+
+        }
+    )
+
+
+    .then(
+        function(response) {
+
+            return response.json();
+
+        }
+    )
+
+
+    .then(
+        function(data) {
+
+
+            // =================================================
+            // نجاح
+            // =================================================
+
+            if (
+                data.status === "success"
+            ) {
+
+
+                successfulScans++;
+
+
+                scanCount.textContent =
+                    successfulScans;
+
+
+                lastCode.innerHTML =
+
+                    "آخر تسجيل ناجح:<br>" +
+
+                    "<strong>" +
+                    data.code +
+                    "</strong>" +
+
+                    "<br>" +
+
+                    "الدراسة: " +
+                    data.study +
+
+                    "<br>" +
+
+                    "المجموعة: " +
+                    data.group;
+
+
+                status.textContent =
+                    "✅ تم تسجيل الحضور بنجاح";
+
+
+                status.className =
+                    "status-success";
+
+            }
+
+
+            // =================================================
+            // مكرر
+            // =================================================
+
+            else if (
+                data.status === "duplicate"
+            ) {
+
+
+                status.textContent =
+                    "⚠️ هذا QR مسجل مسبقاً " +
+                    "لنفس البيانات اليوم";
+
+
+                status.className =
+                    "status-error";
+
+            }
+
+
+            // =================================================
+            // خطأ
+            // =================================================
+
+            else {
+
+
+                status.textContent =
+                    "❌ " +
+                    data.message;
+
+
+                status.className =
+                    "status-error";
+
+            }
+
+
+            saving =
+                false;
+
+        }
+    )
+
+
+    .catch(
+        function(error) {
+
+
+            console.error(error);
+
+
+            status.textContent =
+                "❌ حدث خطأ في الاتصال بالخادم";
+
+
+            status.className =
+                "status-error";
+
+
+            saving =
+                false;
+
+        }
+    );
+
+}
+
+
+// =====================================================
+// إيقاف الكاميرا
+// =====================================================
+
+function stopCamera() {
+
+
+    if (scanner !== null) {
+
+
+        scanner.stop()
+
+        .then(
+            function() {
+
+                scanner.clear();
+
+                scanner =
+                    null;
+
+            }
+        )
+
+        .catch(
+            function(error) {
+
+                console.error(error);
+
+                scanner =
+                    null;
+
+            }
+        );
+
+    }
+
+
+    cameraSection.style.display =
+        "none";
+
+}
+
+
+// =====================================================
+// زر إنهاء المسح
+// =====================================================
+
+stopCameraButton.addEventListener(
+    "click",
+    function () {
+
+
+        stopCamera();
+
+
+        status.textContent =
+            "تم إنهاء المسح";
+
+
+        status.className =
+            "status-info";
+
+    }
+);
+
+</script>
+
+
+</body>
+
+</html>
